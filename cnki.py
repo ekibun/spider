@@ -1,9 +1,8 @@
 #coding:utf-8
 import codecs
 import requests
-import scrapy
 from urllib.parse import urlencode
-from lxml import etree          # 用于解析网页
+from lxml import etree
 import time
 import sys
 import io
@@ -59,11 +58,11 @@ def search(key,fo=sys.stdout,page=1):
         "dbPrefix":"SCDB",
         "keyValue":key,
         "S":"1",
-        "sorttype":"(发表时间,'TIME') desc",
+        "sorttype":"(FFD,'RANK') desc",
     }
     response=s.get(url+urlencode(parameter),headers=headers)
-    selector=scrapy.Selector(text=response.text)
-    lst=selector.xpath('//input[@type="checkbox"]/@value').extract()
+    selector=etree.HTML(text=response.text)
+    lst=selector.xpath('//input[@type="checkbox"]/@value')
     QueryID = ",".join(lst).split('!')[-1]
     print('QueryID=' + QueryID)
     i=page
@@ -80,9 +79,8 @@ def search(key,fo=sys.stdout,page=1):
         try:
             # 用urlencode构建网址
             response=s.get(url+urlencode(param),headers=headers)
-            selector=scrapy.Selector(text=response.text)
-            # 仅仅<tbody>无法被找到
-            lst=selector.xpath('//input[@type="checkbox"]/@value').extract()
+            selector=etree.HTML(text=response.text)
+            lst=selector.xpath('//input[@type="checkbox"]/@value')
             if len(lst) > 0:
                 i=i+1
                 print(lst)
@@ -101,7 +99,7 @@ def search(key,fo=sys.stdout,page=1):
 
 if __name__ == '__main__':
     key='人工智能'
-    fo = codecs.open(key+".txt", "w", encoding='utf-8')
+    fo = codecs.open("out/"+key+".txt", "w", encoding='utf-8')
     i = 1
     while(True):
         newi = search(key,fo, i)

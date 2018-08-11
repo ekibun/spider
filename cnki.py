@@ -57,26 +57,26 @@ def search(key,fo=sys.stdout,page=1):
         "pagename":"ASP.brief_default_result_aspx",
         "dbPrefix":"SCDB",
         "keyValue":key,
+        "RecordsPerPage":"50",
         "S":"1",
-        "sorttype":"(FFD,'RANK') desc",
+        "sorttype":"(发表时间,'TIME') desc",
     }
-    response=s.get(url+urlencode(parameter),headers=headers)
-    selector=etree.HTML(text=response.text)
-    lst=selector.xpath('//input[@type="checkbox"]/@value')
-    QueryID = ",".join(lst).split('!')[-1]
-    print('QueryID=' + QueryID)
-    i=page
-    while(True):
-        print('page=' + str(i))
-        param = parameter.copy()
-        param.update({
+    try:
+        response=s.get(url+urlencode(parameter),headers=headers)
+        selector=etree.HTML(text=response.text)
+        lst=selector.xpath('//input[@type="checkbox"]/@value')
+        QueryID = ",".join(lst).split('!')[-1]
+        print('QueryID=' + QueryID)
+        i=page
+        while(True):
+            print('page=' + str(i))
+            param = parameter.copy()
+            param.update({
                 "curpage":str(i),
-                "RecordsPerPage":"20",
                 "QueryID":QueryID,
                 "turnpage":"1",
                 "tpagemode":"L"
             })
-        try:
             # 用urlencode构建网址
             response=s.get(url+urlencode(param),headers=headers)
             selector=etree.HTML(text=response.text)
@@ -88,17 +88,16 @@ def search(key,fo=sys.stdout,page=1):
                 query_files(lst,fo)
             else:
                 raise RuntimeError('err')
-        except Exception as e:
-            if(str(e)!='err'):
-                print(e)
-                os.system("pause")
-            else:
-                return i
+    except Exception as e:
+        if(str(e)!='err'):
+            print(e)
+            os.system("pause")
+    return i
     
 
 
 if __name__ == '__main__':
-    key='人工智能'
+    key='区块链'
     fo = codecs.open("out/"+key+".txt", "w", encoding='utf-8')
     i = 1
     while(True):
